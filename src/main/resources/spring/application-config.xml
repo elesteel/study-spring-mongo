@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.7.xsd">
+
+<!-- 	
+	<mongo:db-factory host="mongo.duapp.com" port="8908" dbname="SPpppctvdtChnAWxxwGO" username="21obDNnKh8Wp5NsmFEd5U715" password="HhGx02Me0w9GxW0myZz0sCljmoMeREGs" />
+	
+
+
+	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongo" ref="mongo"/>
+        <constructor-arg name="databaseName" value="SPpppctvdtChnAWxxwGO"/>
+        <constructor-arg name="userCredentials" ref="mongoCredentials"/>
+    </bean>
+
+    <bean id="mongoCredentials" class="org.springframework.data.authentication.UserCredentials">
+        <constructor-arg name="username" value="21obDNnKh8Wp5NsmFEd5U715" />
+        <constructor-arg name="password" value="HhGx02Me0w9GxW0myZz0sCljmoMeREGs" />
+    </bean>
+ -->
+    
+    <bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:/properties/database.properties</value>
+		</property>
+	</bean>
+	
+	<mongo:mongo id="mongo" host="${mongo.host}" port="${mongo.port}">
+		<mongo:options connections-per-host="8"
+			threads-allowed-to-block-for-connection-multiplier="4"
+			connect-timeout="10000" max-wait-time="15000" auto-connect-retry="true"
+			socket-keep-alive="true" socket-timeout="15000" slave-ok="true"
+			write-number="1" write-timeout="0" write-fsync="true" />
+    </mongo:mongo>
+    
+    <mongo:db-factory dbname="${mongo.dbname}" username="${mongo.username}" password="${mongo.password}" mongo-ref="mongo" />
+    
+        
+	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+	</bean>    
+
+    
+    <context:component-scan
+       base-package="cn.touchmedia.sean.mongo"/>
+
+</beans>
