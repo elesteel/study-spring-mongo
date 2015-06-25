@@ -3,9 +3,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.7.xsd">
+		http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.7.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
 <!-- 	
 	<mongo:db-factory host="mongo.duapp.com" port="8908" dbname="SPpppctvdtChnAWxxwGO" username="21obDNnKh8Wp5NsmFEd5U715" password="HhGx02Me0w9GxW0myZz0sCljmoMeREGs" />
@@ -50,4 +52,6 @@
     <context:component-scan
        base-package="cn.touchmedia.sean.mongo"/>
 
+	<task:annotation-driven />
+    <bean id="signJob" class="cn.touchmedia.sean.mongo.AutoSign"></bean>
 </beans>
