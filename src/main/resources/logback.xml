@@ -20,6 +20,8 @@ See here for more details: http://gordondickens.com/wordpress/2013/03/27/sawing-
    <!-- Uncomment and add your logger here:
     <logger name="org.springframework.samples.service.service" level="debug"/> -->
          
+    <logger name="cn.touchmedia.sean.mongo" level="info"/>
+    
     <root level="info">
         <appender-ref ref="console"/>
     </root>

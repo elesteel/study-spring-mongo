@@ -11,6 +11,7 @@ import java.util.zip.GZIPOutputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -25,15 +26,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import cn.touchmedia.sean.mongo.flow.FlowMonitorBean;
+import cn.touchmedia.sean.mongo.flow.FlowRecord;
+import cn.touchmedia.sean.mongo.flow.IFlowDao;
+import cn.touchmedia.sean.mongo.flow.IFlowService;
+
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Controller
 public class MyController {
 
 	private static final String COLLECTION_NAME = "cellset";
+
+	private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MyController.class);
 	
 	@Autowired
 	MongoOperations mongoOps;
+	
+	@Autowired
+	IFlowDao flowDao;
+	
+	@Autowired
+	IFlowService flowService;
 	
 	
 	@RequestMapping( value = "jsondata", method = RequestMethod.POST, consumes="application/json")
@@ -72,8 +87,7 @@ public class MyController {
 				}
 			}
 			long duration = (System.nanoTime() - startTime) / 1000000;
-			System.out.println("update " + cells.length + " records used " + duration + " ms" );
-			
+			logger.debug("update " + cells.length + " records used " + duration + " ms");
 			return "success";
 		} catch (IOException e) {
 			throw new RuntimeException("fail");
@@ -129,7 +143,7 @@ public class MyController {
 	@RequestMapping( value = "getcells", method = RequestMethod.GET )
 	@ResponseBody
 	public String getCells(  @RequestParam("mnc") int mnc, OutputStream os) {
-		System.out.println("getCells");
+		//System.out.println("getCells");
 		long startTime = System.nanoTime();
 		OutputStream out = null;
 		try {
@@ -172,7 +186,7 @@ public class MyController {
 			IOUtils.closeQuietly(out);
 		}
 		long duration = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("duration: " + duration + " ms");
+		//System.out.println("duration: " + duration + " ms");
 		return "OK";
 	}
 	
@@ -244,4 +258,31 @@ public class MyController {
 		return "OK";
 	}
 	*/
+	
+//	@RequestMapping( value = "/test", method = RequestMethod.GET)
+//	@ResponseBody
+//	public String test() {
+//		flowDao.createTable("tbl_flow_201506");
+//		logger.info("create table tbl_flow_201506");
+//		return "ok2";
+//	}
+	
+	@RequestMapping( value = "/flow", method = RequestMethod.POST)
+	@ResponseBody
+	public String receiveFlowData( HttpServletRequest request ) {
+		logger.debug("receiveFlowData: ");
+		try {
+			String content = IOUtils.toString(request.getReader());
+			logger.debug(content);
+			Gson gson = new GsonBuilder().setDateFormat("yyyyMMdd").create();
+			FlowMonitorBean b = gson.fromJson(content, FlowMonitorBean.class);
+			logger.info("receive flow data from " + b.getTbid() + " - " + b.getLiscense());
+			flowService.saveFlowRecords(b.getTbid(), b.getLiscense(), b.getData());
+		} catch( IOException e ) {
+			logger.error("exception happen when handle flow data");
+			e.printStackTrace();
+			return "fail";
+		}
+		return "success";
+	}
 }
