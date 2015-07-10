@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.touchmedia.sean.mongo.flow.FlowMonitorBean;
-import cn.touchmedia.sean.mongo.flow.FlowRecord;
 import cn.touchmedia.sean.mongo.flow.IFlowDao;
 import cn.touchmedia.sean.mongo.flow.IFlowService;
 
@@ -276,7 +276,7 @@ public class MyController {
 			logger.debug(content);
 			Gson gson = new GsonBuilder().setDateFormat("yyyyMMdd").create();
 			FlowMonitorBean b = gson.fromJson(content, FlowMonitorBean.class);
-			logger.info("receive flow data from " + b.getTbid() + " - " + b.getLiscense());
+			logger.info("receive flow data from " + b.getTbid() + " - " + b.getLiscense() + " at " + new Date());
 			flowService.saveFlowRecords(b.getTbid(), b.getLiscense(), b.getData());
 		} catch( IOException e ) {
 			logger.error("exception happen when handle flow data");

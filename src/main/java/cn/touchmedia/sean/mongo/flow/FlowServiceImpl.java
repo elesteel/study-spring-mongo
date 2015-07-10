@@ -68,10 +68,14 @@ public class FlowServiceImpl implements IFlowService {
 		if( records.isEmpty() )
 			return;
 		
-		if( records.size() == 1 ) {
-			flowDao.saveFlowRecord( tableName, taxiFleet, taxiLicense, records.get(0));
-		} else {
-			flowDao.batchSaveFlowRecords( tableName, taxiFleet, taxiLicense, records );
+//		if( records.size() == 1 ) {
+//			flowDao.saveFlowRecord( tableName, taxiFleet, taxiLicense, records.get(0));
+//		} else {
+//			flowDao.batchSaveFlowRecords( tableName, taxiFleet, taxiLicense, records );
+//		}
+		
+		for( FlowRecord record : records ) {
+			flowDao.saveFlowRecord(tableName, taxiFleet, taxiLicense, record);
 		}
 	}
 

@@ -7,6 +7,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -38,7 +39,8 @@ public class FlowDaoImpl implements IFlowDao {
 				+ " `TAXI_FLEET` varchar(4) NOT NULL,"
 				+ " `TAXI_ID` varchar(6) NOT NULL,"
 				+ " `TX` bigint(20) DEFAULT NULL,"
-				+ " PRIMARY KEY (`FLOW_ID`)"
+				+ " PRIMARY KEY (`FLOW_ID`),"
+				+ " UNIQUE (`FLOW_DATE`, `TAXI_ID`)"
 				+ " )";
 				
 		jdbcTemplate.execute(sql);
@@ -48,21 +50,26 @@ public class FlowDaoImpl implements IFlowDao {
 	public void saveFlowRecord(String tableName, final String taxiFleet, final String taxiLicense, final FlowRecord record) {
 		String sql = "insert into " + tableName + " ( FLOW, FLOW_DATE, RX, TAXI_FLEET, TAXI_ID, TX ) "
 				+ " values ( ?, ?, ?, ?, ?, ? ) ";
-		jdbcTemplate.update(sql, new PreparedStatementSetter() {
-			
-			@Override
-			public void setValues(PreparedStatement ps) throws SQLException {
-				long rx = record.getRx();
-				long tx = record.getTx();
-				java.sql.Date date = new java.sql.Date( record.getF_date().getTime() );
-				ps.setLong(1, rx + tx);
-				ps.setDate(2, date);
-				ps.setLong(3, rx);
-				ps.setString(4, taxiFleet);
-				ps.setString(5, taxiLicense);
-				ps.setLong(6, tx);
-			}
-		});
+		try {
+			jdbcTemplate.update(sql, new PreparedStatementSetter() {
+
+				@Override
+				public void setValues(PreparedStatement ps) throws SQLException {
+					long rx = record.getRx();
+					long tx = record.getTx();
+					java.sql.Date date = new java.sql.Date( record.getF_date().getTime() );
+					ps.setLong(1, rx + tx);
+					ps.setDate(2, date);
+					ps.setLong(3, rx);
+					ps.setString(4, taxiFleet);
+					ps.setString(5, taxiLicense);
+					ps.setLong(6, tx);
+				}
+			});
+		} catch ( DuplicateKeyException e ) {
+			// ignore
+			System.out.println("error: already inserted " + taxiLicense + " " + record.getF_date());
+		}
 	}
 
 	@Override
